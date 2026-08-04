@@ -20,15 +20,15 @@ import ServingsEditor from "./product-form/ServingsEditor";
 import VariantsEditor from "./product-form/VariantsEditor";
 import FlavoursEditor from "./product-form/FlavoursEditor";
 import FaqsEditor from "./product-form/FaqsEditor";
-import ImageUploader from "./product-form/ImageUploader";
+
 
 
 const emptyForm = {
   slug: "",
   name: "",
   sku: "",
-  stockStatus: "In stock",
-  status: "Published",
+  stockQuantity: "",
+  status: "active",
   categoryId: "",
   title: "",
   description: "",
@@ -71,32 +71,24 @@ function validateForm(form) {
   if (!form.slug.trim()) errors.push("Slug is required");
   if (!form.sku.trim()) errors.push("SKU is required");
   if (!form.categoryId) errors.push("Category ID is required");
+  if (!form.stockQuantity) errors.push("Stock Quantity is required");
+  if (!form.status.trim()) errors.push("Status is required");
   if (!form.title.trim()) errors.push("Title is required");
   if (!form.description.trim()) errors.push("Description is required");
-  if (!form.price) errors.push("Base price is required");
   if (!form.discounted) errors.push("Discounted price is required");
 
-  if (form.featuredimg.length === 0) errors.push("Featured image is required");
+  if (!form.featuredimg.trim()) errors.push("Featured image is required");
   if (form.images.length === 0) errors.push("At least one gallery image is required");
   if (form.servings.length === 0) errors.push("At least one serving is required");
   if (form.variants.length === 0) errors.push("At least one variant is required");
-  if (form.flavours.length === 0) errors.push("At least one flavour is required");
 
   if (form.keyBenefits.length === 0) errors.push("At least one key benefit is required");
-  if (form.whychooseus.length === 0) errors.push("At least one 'why choose us' point is required");
-  if (form.whoShouldUse.length === 0) errors.push("At least one 'who should use' point is required");
-  if (form.howToUse.length === 0) errors.push("At least one 'how to use' step is required");
-  if (form.whatToAvoid.length === 0) errors.push("At least one 'what to avoid' point is required");
-  if (form.safetyInformation.length === 0) errors.push("At least one safety note is required");
-
   if (form.faqs.length === 0) errors.push("At least one FAQ is required");
 
   if (!form.seo.title.trim()) errors.push("SEO title is required");
   if (!form.seo.description.trim()) errors.push("SEO description is required");
-  if (!form.seo.keywords.trim()) errors.push("SEO keywords is required");
   if (!form.seo.canonical.trim()) errors.push("SEO canonical URL is required");
-  if (!form.seo.author.trim()) errors.push("SEO author is required");
-  if (!form.seo.publisher.trim()) errors.push("SEO publisher is required");
+
   return errors;
 }
 
@@ -124,14 +116,13 @@ useEffect(() => {
     setForm({
       ...emptyForm,
       ...product,
-      images: toImageEntries(product.images || []),
-      featuredimg: product.featuredimg
-        ? [{ id: crypto.randomUUID(), url: product.featuredimg, file: null, previewUrl: product.featuredimg }]
-        : [],
+      category: product.category || "",
+      images: product.images || [],
+      featuredimg: product.featuredimg || "",
       seo: { ...emptyForm.seo, ...product.seo },
     });
   } else {
-    setForm({ ...emptyForm, images: [], featuredimg: [] });
+    setForm(emptyForm);
   }
 }, [product, open]);
 
@@ -160,15 +151,16 @@ function handleSubmit(e) {
   }
   setErrors([]);
 
-  onSave({
-    ...product,
+  const payload = {
     ...form,
-    price: Number(form.price) || 0,
-    discounted: Number(form.discounted) || 0,
-    categoryId: Number(form.categoryId) || 0,
-    images: form.images.map((img) => img.url || img.previewUrl),
-    featuredimg: form.featuredimg[0]?.url || form.featuredimg[0]?.previewUrl || "",
-  });
+    categoryId: Number(form.categoryId),
+    price: form.price ? String(form.price) : null, // still optional
+    discounted: String(form.discounted),
+    stockQuantity: Number(form.stockQuantity), // guaranteed present now
+    sku: form.sku, // guaranteed present now
+  };
+
+  onSave(product ? { ...product, ...payload } : payload);
   onOpenChange(false);
 }
 
@@ -185,7 +177,7 @@ function handleSubmit(e) {
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="images">Images</TabsTrigger>
               <TabsTrigger value="pricing">Pricing & Variants</TabsTrigger>
-              <TabsTrigger value="flavours">Flavours</TabsTrigger>
+            
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="faqs">FAQs</TabsTrigger>
               <TabsTrigger value="seo">SEO</TabsTrigger>
@@ -204,22 +196,25 @@ function handleSubmit(e) {
                 </div>
                 <div className="space-y-1.5">
                   <Label>SKU</Label>
-                  <Input value={form.sku} onChange={(e) => set("sku", e.target.value)} required/>
+                  <Input value={form.sku} onChange={(e) => set("sku", e.target.value)} required />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Category ID</Label>
-                  <Input type="number" value={form.categoryId} onChange={(e) => set("categoryId", e.target.value)} required/>
+                  <Input
+                    type="number"
+                    value={form.categoryId}
+                    onChange={(e) => set("categoryId", e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Stock Status</Label>
-                  <select
-                    value={form.stockStatus}
-                    onChange={(e) => set("stockStatus", e.target.value)}
-                    className="w-full h-9 rounded-md border px-3 text-sm bg-transparent"
-                  >
-                    <option>In stock</option>
-                    <option>Out of stock</option>
-                  </select>
+                  <Label>Stock Quantity</Label>
+                  <Input
+                    type="number"
+                    value={form.stockQuantity}
+                    onChange={(e) => set("stockQuantity", e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Status</Label>
@@ -228,9 +223,8 @@ function handleSubmit(e) {
                     onChange={(e) => set("status", e.target.value)}
                     className="w-full h-9 rounded-md border px-3 text-sm bg-transparent"
                   >
-                    <option>Published</option>
-                    <option>Pending</option>
-                    <option>Draft</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                   </select>
                 </div>
               </div>
@@ -262,18 +256,20 @@ function handleSubmit(e) {
             </TabsContent>
 
             {/* IMAGES */}
-            <TabsContent value="images" className="space-y-5 pt-4">
-              <ImageUploader
-                label="Featured Image"
-                images={form.featuredimg}
-                onChange={(v) => set("featuredimg", v)}
-                multiple={false}
-              />
-              <ImageUploader
+            <TabsContent value="images" className="space-y-4 pt-4">
+              <div className="space-y-1.5">
+                <Label>Featured Image Path</Label>
+                <Input
+                  value={form.featuredimg}
+                  onChange={(e) => set("featuredimg", e.target.value)}
+                  placeholder="/Promolecules/product-name/image.webp"
+                />
+              </div>
+              <StringListEditor
                 label="Gallery Images"
-                images={form.images}
+                items={form.images}
                 onChange={(v) => set("images", v)}
-                multiple={true}
+                placeholder="/Promolecules/product-name/image.webp"
               />
             </TabsContent>
 
@@ -292,11 +288,6 @@ function handleSubmit(e) {
 
               <ServingsEditor servings={form.servings} onChange={(v) => set("servings", v)} />
               <VariantsEditor variants={form.variants} onChange={(v) => set("variants", v)} />
-            </TabsContent>
-
-            {/* FLAVOURS */}
-            <TabsContent value="flavours" className="pt-4">
-              <FlavoursEditor flavours={form.flavours} onChange={(v) => set("flavours", v)} />
             </TabsContent>
 
             {/* CONTENT LISTS */}
