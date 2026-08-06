@@ -16,18 +16,19 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 import StringListEditor from "./product-form/StringListEditor";
-import ServingsEditor from "./product-form/ServingsEditor";
 import VariantsEditor from "./product-form/VariantsEditor";
-import FlavoursEditor from "./product-form/FlavoursEditor";
 import FaqsEditor from "./product-form/FaqsEditor";
 
-
+// NOTE: ServingsEditor and FlavoursEditor are no longer imported/used.
+// The API now folds size, flavour, price, discountedPrice, and
+// stockQuantity into a single `variants[]` array per product — there's
+// no more separate top-level price/discounted/stockQuantity, and no
+// separate servings[]/flavours[] arrays. You can delete those two files.
 
 const emptyForm = {
   slug: "",
   name: "",
   sku: "",
-  stockQuantity: "",
   status: "active",
   categoryId: "",
   title: "",
@@ -37,11 +38,7 @@ const emptyForm = {
   cost2cost: "",
   featuredimg: "",
   images: [],
-  price: "",
-  discounted: "",
-  servings: [],
   variants: [],
-  flavours: [],
   keyBenefits: [],
   whychooseus: [],
   whoShouldUse: [],
@@ -58,8 +55,25 @@ const emptyForm = {
     publisher: "",
     language: "English",
     robots: "index, follow",
-    og: { title: "", type: "website", image: "" },
-    twitter: { card: "summary_large_image", title: "" },
+    geo: { region: "", placename: "" },
+    og: {
+      title: "",
+      type: "website",
+      image: "",
+      image_alt: "",
+      locale: "",
+      site_name: "",
+      description: "",
+      url: "",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "",
+      site: "",
+      description: "",
+      image: "",
+      image_alt: "",
+    },
   },
 };
 
@@ -71,16 +85,27 @@ function validateForm(form) {
   if (!form.slug.trim()) errors.push("Slug is required");
   if (!form.sku.trim()) errors.push("SKU is required");
   if (!form.categoryId) errors.push("Category ID is required");
-  if (!form.stockQuantity) errors.push("Stock Quantity is required");
   if (!form.status.trim()) errors.push("Status is required");
   if (!form.title.trim()) errors.push("Title is required");
   if (!form.description.trim()) errors.push("Description is required");
-  if (!form.discounted) errors.push("Discounted price is required");
 
   if (!form.featuredimg.trim()) errors.push("Featured image is required");
   if (form.images.length === 0) errors.push("At least one gallery image is required");
-  if (form.servings.length === 0) errors.push("At least one serving is required");
-  if (form.variants.length === 0) errors.push("At least one variant is required");
+
+  if (form.variants.length === 0) {
+    errors.push("At least one variant is required");
+  } else {
+    form.variants.forEach((v, i) => {
+      const label = `Variant ${i + 1}`;
+      if (!String(v.flavour ?? "").trim()) errors.push(`${label}: flavour is required`);
+      if (!String(v.size ?? "").trim()) errors.push(`${label}: size is required`);
+      if (v.price === "" || v.price == null) errors.push(`${label}: price is required`);
+      if (v.discountedPrice === "" || v.discountedPrice == null)
+        errors.push(`${label}: discounted price is required`);
+      if (v.stockQuantity === "" || v.stockQuantity == null)
+        errors.push(`${label}: stock quantity is required`);
+    });
+  }
 
   if (form.keyBenefits.length === 0) errors.push("At least one key benefit is required");
   if (form.faqs.length === 0) errors.push("At least one FAQ is required");
@@ -92,39 +117,31 @@ function validateForm(form) {
   return errors;
 }
 
-
-
-
-//converts your existing string-path data into the new object shape when a product is loaded for editing
-function toImageEntries(paths = []) {
-  return paths.map((p) => ({
-    id: crypto.randomUUID(),
-    url: p,
-    file: null,
-    previewUrl: p,
-  }));
-}
-
-
-
-
 export default function ProductForm({ open, onOpenChange, product, onSave }) {
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState([]);
-useEffect(() => {
-  if (product) {
-    setForm({
-      ...emptyForm,
-      ...product,
-      category: product.category || "",
-      images: product.images || [],
-      featuredimg: product.featuredimg || "",
-      seo: { ...emptyForm.seo, ...product.seo },
-    });
-  } else {
-    setForm(emptyForm);
-  }
-}, [product, open]);
+
+  useEffect(() => {
+    if (product) {
+      setForm({
+        ...emptyForm,
+        ...product,
+        category: product.category || "",
+        images: product.images || [],
+        featuredimg: product.featuredimg || "",
+        variants: product.variants || [],
+        seo: {
+          ...emptyForm.seo,
+          ...(product.seo || {}),
+          geo: { ...emptyForm.seo.geo, ...(product.seo?.geo || {}) },
+          og: { ...emptyForm.seo.og, ...(product.seo?.og || {}) },
+          twitter: { ...emptyForm.seo.twitter, ...(product.seo?.twitter || {}) },
+        },
+      });
+    } else {
+      setForm(emptyForm);
+    }
+  }, [product, open]);
 
   function set(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -141,28 +158,37 @@ useEffect(() => {
     }));
   }
 
-function handleSubmit(e) {
-  e.preventDefault();
+  function handleSubmit(e) {
+    e.preventDefault();
 
-  const validationErrors = validateForm(form);
-  if (validationErrors.length > 0) {
-    setErrors(validationErrors);
-    return;
+    const validationErrors = validateForm(form);
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors([]);
+
+    const payload = {
+      ...form,
+      categoryId: Number(form.categoryId),
+      // price/discountedPrice stay strings (matches the API's own shape),
+      // stockQuantity is a real number — same split the old top-level
+      // fields used, just applied per variant now.
+      variants: form.variants.map((v) => ({
+        ...v,
+        price: v.price === "" || v.price == null ? v.price : String(v.price),
+        discountedPrice:
+          v.discountedPrice === "" || v.discountedPrice == null
+            ? v.discountedPrice
+            : String(v.discountedPrice),
+        stockQuantity:
+          v.stockQuantity === "" || v.stockQuantity == null ? 0 : Number(v.stockQuantity),
+      })),
+    };
+
+    onSave(product ? { ...product, ...payload } : payload);
+    onOpenChange(false);
   }
-  setErrors([]);
-
-  const payload = {
-    ...form,
-    categoryId: Number(form.categoryId),
-    price: form.price ? String(form.price) : null, // still optional
-    discounted: String(form.discounted),
-    stockQuantity: Number(form.stockQuantity), // guaranteed present now
-    sku: form.sku, // guaranteed present now
-  };
-
-  onSave(product ? { ...product, ...payload } : payload);
-  onOpenChange(false);
-}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -177,7 +203,6 @@ function handleSubmit(e) {
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="images">Images</TabsTrigger>
               <TabsTrigger value="pricing">Pricing & Variants</TabsTrigger>
-            
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="faqs">FAQs</TabsTrigger>
               <TabsTrigger value="seo">SEO</TabsTrigger>
@@ -196,7 +221,7 @@ function handleSubmit(e) {
                 </div>
                 <div className="space-y-1.5">
                   <Label>SKU</Label>
-                  <Input value={form.sku} onChange={(e) => set("sku", e.target.value)} required />
+                  <Input value={form.sku ?? ""} onChange={(e) => set("sku", e.target.value)} required />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Category ID</Label>
@@ -204,15 +229,6 @@ function handleSubmit(e) {
                     type="number"
                     value={form.categoryId}
                     onChange={(e) => set("categoryId", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Stock Quantity</Label>
-                  <Input
-                    type="number"
-                    value={form.stockQuantity}
-                    onChange={(e) => set("stockQuantity", e.target.value)}
                     required
                   />
                 </div>
@@ -242,11 +258,11 @@ function handleSubmit(e) {
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <Label>Flipkart Link</Label>
-                  <Input value={form.flipkartLink} onChange={(e) => set("flipkartLink", e.target.value)} />
+                  <Input value={form.flipkartLink ?? ""} onChange={(e) => set("flipkartLink", e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Amazon Link</Label>
-                  <Input value={form.amazonLink} onChange={(e) => set("amazonLink", e.target.value)} />
+                  <Input value={form.amazonLink ?? ""} onChange={(e) => set("amazonLink", e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Cost2Cost Link</Label>
@@ -275,18 +291,10 @@ function handleSubmit(e) {
 
             {/* PRICING & VARIANTS */}
             <TabsContent value="pricing" className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Base Price (₹)</Label>
-                  <Input type="number" value={form.price} onChange={(e) => set("price", e.target.value)} required />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Discounted Price (₹)</Label>
-                  <Input type="number" value={form.discounted} onChange={(e) => set("discounted", e.target.value)} required/>
-                </div>
-              </div>
-
-              <ServingsEditor servings={form.servings} onChange={(v) => set("servings", v)} />
+              <p className="text-sm text-slate-500">
+                Price, discounted price, and stock are now set per variant below —
+                there's no separate base price for the product itself.
+              </p>
               <VariantsEditor variants={form.variants} onChange={(v) => set("variants", v)} />
             </TabsContent>
 
@@ -309,16 +317,16 @@ function handleSubmit(e) {
             <TabsContent value="seo" className="space-y-3 pt-4">
               <div className="space-y-1.5">
                 <Label>SEO Title</Label>
-                <Input value={form.seo.title} onChange={(e) => setSeo("title", e.target.value)} required/>
+                <Input value={form.seo.title} onChange={(e) => setSeo("title", e.target.value)} required />
               </div>
               <div className="space-y-1.5">
                 <Label>SEO Description</Label>
-                <Textarea value={form.seo.description} onChange={(e) => setSeo("description", e.target.value)} required/>
+                <Textarea value={form.seo.description} onChange={(e) => setSeo("description", e.target.value)} required />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Keywords</Label>
-                  <Input value={form.seo.keywords} onChange={(e) => setSeo("keywords", e.target.value)} required/>
+                  <Input value={form.seo.keywords} onChange={(e) => setSeo("keywords", e.target.value)} required />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Canonical URL</Label>
@@ -347,22 +355,40 @@ function handleSubmit(e) {
                 <Input placeholder="OG Title" value={form.seo.og.title} onChange={(e) => setSeoNested("og", "title", e.target.value)} />
                 <Input placeholder="OG Type" value={form.seo.og.type} onChange={(e) => setSeoNested("og", "type", e.target.value)} />
                 <Input placeholder="OG Image" value={form.seo.og.image} onChange={(e) => setSeoNested("og", "image", e.target.value)} />
+                <Input placeholder="OG Image Alt Text" value={form.seo.og.image_alt} onChange={(e) => setSeoNested("og", "image_alt", e.target.value)} />
+                <Input placeholder="OG Locale (e.g. AE-DU)" value={form.seo.og.locale} onChange={(e) => setSeoNested("og", "locale", e.target.value)} />
+                <Input placeholder="OG Site Name" value={form.seo.og.site_name} onChange={(e) => setSeoNested("og", "site_name", e.target.value)} />
+                <Input placeholder="OG URL" value={form.seo.og.url} onChange={(e) => setSeoNested("og", "url", e.target.value)} />
+                <Textarea placeholder="OG Description" value={form.seo.og.description} onChange={(e) => setSeoNested("og", "description", e.target.value)} />
               </div>
 
               <div className="border rounded-md p-3 space-y-2">
                 <Label className="text-sm font-semibold">Twitter Card</Label>
                 <Input placeholder="Card Type" value={form.seo.twitter.card} onChange={(e) => setSeoNested("twitter", "card", e.target.value)} />
                 <Input placeholder="Twitter Title" value={form.seo.twitter.title} onChange={(e) => setSeoNested("twitter", "title", e.target.value)} />
+                <Input placeholder="Twitter Site (e.g. Promolecules)" value={form.seo.twitter.site} onChange={(e) => setSeoNested("twitter", "site", e.target.value)} />
+                <Input placeholder="Twitter Image" value={form.seo.twitter.image} onChange={(e) => setSeoNested("twitter", "image", e.target.value)} />
+                <Input placeholder="Twitter Image Alt Text" value={form.seo.twitter.image_alt} onChange={(e) => setSeoNested("twitter", "image_alt", e.target.value)} />
+                <Textarea placeholder="Twitter Description" value={form.seo.twitter.description} onChange={(e) => setSeoNested("twitter", "description", e.target.value)} />
+              </div>
+
+              <div className="border rounded-md p-3 space-y-2">
+                <Label className="text-sm font-semibold">Geo Location</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input placeholder="Region (e.g. AE-DU)" value={form.seo.geo.region} onChange={(e) => setSeoNested("geo", "region", e.target.value)} />
+                  <Input placeholder="Place Name (e.g. Dubai)" value={form.seo.geo.placename} onChange={(e) => setSeoNested("geo", "placename", e.target.value)} />
+                </div>
               </div>
             </TabsContent>
           </Tabs>
+
           {errors.length > 0 && (
             <div className="border border-red-300 bg-red-50 text-red-700 rounded-md p-3 text-sm space-y-1">
               <p className="font-medium">Please fix the following:</p>
               <ul className="list-disc pl-5">
-              {errors.map((err, i) => (
-                <li key={i}>{err}</li>
-              ))}
+                {errors.map((err, i) => (
+                  <li key={i}>{err}</li>
+                ))}
               </ul>
             </div>
           )}
