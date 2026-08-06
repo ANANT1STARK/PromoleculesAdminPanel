@@ -11,7 +11,7 @@
 //     </div>
 //   );
 // }
-
+// fixed sidebar problem for not sticking 
 
 import Sidebar from "@/app/components/ui/Sidebar";
 import Topbar from "@/app/components/ui/Topbar";
