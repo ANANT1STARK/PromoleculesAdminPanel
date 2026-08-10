@@ -3,5 +3,5 @@ export const metadata = {
   title : "ProMolecules Admin Page"
 }
 export default function AdminIndexPage() {
-  redirect("/admin/dashboard");
+  redirect("/login");
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import RevenueChart from "@/components/dashboard/RevenueChart";
@@ -18,12 +18,48 @@ import {
 
 export default function DashboardPage() {
 
-  
+
 
 
 
 
   const [period, setPeriod] = useState("year");
+
+
+useEffect(() => {
+  async function fetchDashboard() {
+    try {
+      const token = sessionStorage.getItem("pm_admin_token");
+
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard/`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      console.log(data);
+    } catch (err) {
+      console.error("Failed to fetch dashboard:", err);
+    }
+  }
+
+  fetchDashboard();
+}, []);
+
 
   return (
     <div className="space-y-6">
@@ -41,5 +77,6 @@ export default function DashboardPage() {
         <TopProducts products={topProductsData} />
       </div>
     </div>
+    
   );
 }

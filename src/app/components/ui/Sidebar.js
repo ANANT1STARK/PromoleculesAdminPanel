@@ -45,7 +45,7 @@ const ecommerceSubItems = [
   { label: "Brands", href: "/admin/ecommerce/brands" },
   { label: "Reviews", href: "/admin/ecommerce/reviews" },
   { label: "Flash Sales", href: "/admin/ecommerce/flash-sales" },
-  { label: "Discounts", href: "/admin/ecommerce/discounts" },
+  { label: "Coupons", href: "/admin/ecommerce/coupons" },
   { label: "Customers", href: "/admin/ecommerce/customers" },
 ];
 

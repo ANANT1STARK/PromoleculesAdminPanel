@@ -15,18 +15,22 @@
 
 import Sidebar from "@/app/components/ui/Sidebar";
 import Topbar from "@/app/components/ui/Topbar";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function AdminLayout({ children }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar className="h-screen w-64 shrink-0 overflow-y-auto" />
+    <ProtectedRoute>
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar />
-        <main className="flex-1 overflow-y-auto bg-background p-6">
-          {children}
-        </main>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Topbar />
+
+          <main className="flex-1 overflow-y-auto bg-background p-6">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

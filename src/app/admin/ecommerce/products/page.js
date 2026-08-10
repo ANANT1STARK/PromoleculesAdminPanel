@@ -44,11 +44,14 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
+
+
   function handleAddClick() {
     setEditingProduct(null);
     setFormOpen(true);
   }
 
+  
   function handleEditClick(product) {
     setEditingProduct(product);
     setFormOpen(true);
@@ -64,6 +67,8 @@ export default function ProductsPage() {
 
 
   async function confirmDelete() {
+
+    
   if (!productToDelete) return;
 
   setDeleting(true);

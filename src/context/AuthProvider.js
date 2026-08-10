@@ -1,5 +1,10 @@
 "use client";
 
+
+import { login as loginService, logout as logoutService } from "@/services/auth";
+import { getUser , getToken} from "@/lib/session";
+
+
 import {
   createContext,
   useContext,
@@ -23,96 +28,83 @@ export function AuthProvider({ children }) {
   // Check if user is already logged in
   // ---------------------------------------
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+useEffect(() => {
+  let mounted = true;
 
-  async function checkAuth() {
-    try {
-      /**
-       * Later replace with:
-       *
-       * const res = await fetch("/api/auth/me", {
-       *   credentials: "include",
-       * });
-       *
-       * if(res.ok){
-       *    const data = await res.json();
-       *    setUser(data.user);
-       * }
-       */
+  async function initialize() {
+    const user = getUser();
+    const token = getToken();
 
-      const savedUser = localStorage.getItem("admin");
-
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
+    if (mounted) {
+      if (user && token) {
+        setUser(user);
+      } else {
+        setUser(null);
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
+
       setLoading(false);
     }
   }
+
+  initialize();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
+
+
+async function checkAuth() {
+  try {
+    const user = getUser();
+    const token = getToken();
+
+    if (user && token) {
+      setUser(user);
+    } else {
+      setUser(null);
+    }
+  } finally {
+    setLoading(false);
+  }
+}
 
   // ---------------------------------------
   // Login
   // ---------------------------------------
 
-  async function login(email, password) {
-    /**
-     * Later
-     *
-     * POST /api/auth/login
-     */
+async function login(email, password) {
+  try {
+    const user = await loginService(email, password);
 
-    if (
-      email === "admin@promolecules.com" &&
-      password === "admin123"
-    ) {
-      const admin = {
-        id: 1,
-        name: "Admin",
-        email,
-        role: "SUPER_ADMIN",
-      };
+    setUser(user);
 
-      localStorage.setItem(
-        "admin",
-        JSON.stringify(admin)
-      );
-
-      setUser(admin);
-
-      router.replace("/admin/dashboard");
-
-      return {
-        success: true,
-      };
-    }
+    router.replace("/admin/dashboard");
 
     return {
+      success: true,
+    };
+  } catch (err) {
+    return {
       success: false,
-      message: "Invalid email or password.",
+      message: err.message,
     };
   }
+}
 
   // ---------------------------------------
   // Logout
   // ---------------------------------------
 
-  async function logout() {
-    /**
-     * Later
-     *
-     * POST /api/auth/logout
-     */
+async function logout() {
+  logoutService();
 
-    localStorage.removeItem("admin");
+  setUser(null);
 
-    setUser(null);
+  router.replace("/login");
+}
 
-    router.replace("/login");
-  }
+
 
   const value = useMemo(
     () => ({
@@ -124,7 +116,7 @@ export function AuthProvider({ children }) {
 
       logout,
 
-      isAuthenticated: !!user,
+      isAuthenticated: !!user && !!getToken(),
     }),
     [user, loading]
   );

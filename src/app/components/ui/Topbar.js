@@ -1,16 +1,72 @@
+"use client";
+
+import { useAuth } from "@/context/AuthProvider";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { Button } from "@/components/ui/button";
+
+import { LogOut, User, Settings } from "lucide-react";
+
 export default function Topbar() {
+  const { user, logout } = useAuth();
+
+  const initial = user?.name?.charAt(0)?.toUpperCase() || "A";
+
   return (
-    <header className="h-16 bg-white border-b flex items-center justify-between px-6">
-      <div className="text-sm text-slate-500">Admin Panel</div>
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-semibold">
-          S
-        </div>
-        <div className="text-sm">
-          <div className="font-medium">Sonu Seth</div>
-          <div className="text-slate-400 text-xs">superadmin@gmail.com</div>
-        </div>
-      </div>
+    <header className="flex h-16 items-center justify-between border-b bg-background px-6">
+      <h1 className="text-xl font-semibold">
+        Admin Panel
+      </h1>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-accent">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white">
+                {initial}
+              </div>
+
+              <div className="text-left">
+                <p className="text-sm font-medium">{user?.name}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
+              </div>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="w-56">
+   <DropdownMenuContent align="end">
+
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            My Account
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem>
+          Profile
+        </DropdownMenuItem>
+
+        <DropdownMenuItem>
+          Settings
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem onClick={logout}>
+          Logout
+        </DropdownMenuItem>
+
+      </DropdownMenuContent>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   );
 }

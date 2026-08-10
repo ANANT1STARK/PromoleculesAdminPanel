@@ -24,7 +24,7 @@ export default function CustomerTable({ customers, onView, onEdit, onDelete }) {
           <TableHead className="w-[15%]">Phone</TableHead>
           <TableHead className="w-[13%]">Created</TableHead>
           <TableHead className="w-[12%]">Status</TableHead>
-          <TableHead className="w-[10%]">Vendor?</TableHead>
+   
           <TableHead className="w-[10%] text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -54,7 +54,7 @@ export default function CustomerTable({ customers, onView, onEdit, onDelete }) {
 
             <TableCell className="text-sm text-blue-600">{c.name}</TableCell>
             <TableCell className="text-sm">{c.phone || "—"}</TableCell>
-            <TableCell className="text-sm">{c.createdAt}</TableCell>
+            <TableCell className="text-sm">{c.createdAt.slice(0,10)}</TableCell>
 
             <TableCell>
               <Badge className="bg-green-100 text-green-700" variant="outline">
@@ -62,7 +62,7 @@ export default function CustomerTable({ customers, onView, onEdit, onDelete }) {
               </Badge>
             </TableCell>
 
-            <TableCell className="text-sm">{c.isVendor}</TableCell>
+      
 
             <TableCell className="text-right">
               <Button size="icon" variant="ghost" onClick={() => onView(c)}>
