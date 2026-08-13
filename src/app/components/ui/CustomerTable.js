@@ -78,9 +78,9 @@ export default function CustomerTable({ customers, onView, onEdit, onDelete }) {
               <Button size="icon" variant="ghost" onClick={() => onEdit(c)}>
                 <Pencil size={16} />
               </Button>
-              <Button size="icon" variant="ghost" onClick={() => onDelete(c.id)}>
+              {/* <Button size="icon" variant="ghost" onClick={() => onDelete(c.id)}>
                 <Trash2 size={16} className="text-red-500" />
-              </Button>
+              </Button> */}
             </TableCell>
           </TableRow>
         ))}

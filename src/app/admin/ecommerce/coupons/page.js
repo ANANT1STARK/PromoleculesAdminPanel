@@ -10,7 +10,7 @@ import DeleteConfirmDialog from "@/app/components/ui/DeleteConfirmDialog";
 import TableSkeleton from "@/app/components/ui/TableSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api/coupons`;
+const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard/coupons`;
 const changeAPIUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard/coupons/`;
 
 function getToken() {
@@ -31,15 +31,19 @@ export default function CouponsPage() {
   useEffect(() => {
     async function fetchCoupons() {
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(
+          API_URL, 
+          {
+            method: "GET",  
+            headers: { "Authorization": `Bearer ${getToken()}` }
+          }
+        );
 
-        console.log(API_URL)
-
-        console.log(res)
         if (!res.ok) {
           throw new Error(`Request failed with status ${res.status}`);
         }
         const data = await res.json();
+        console.log("Fetched coupons:", data);
         setCoupons(data.coupons || []);
       } catch (err) {
         console.error("Failed to fetch coupons:", err);

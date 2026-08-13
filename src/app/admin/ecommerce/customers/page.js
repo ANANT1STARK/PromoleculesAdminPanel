@@ -302,31 +302,31 @@ export default function CustomersPage() {
     }
 
     // creating a new user — POST
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify(customer),
-      });
+    // try {
+    //   const res = await fetch(API_URL, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${getToken()}`,
+    //     },
+    //     body: JSON.stringify(customer),
+    //   });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => null);
-        throw new Error(
-          errData?.message || `Request failed with status ${res.status}`
-        );
-      }
+    //   if (!res.ok) {
+    //     const errData = await res.json().catch(() => null);
+    //     throw new Error(
+    //       errData?.message || `Request failed with status ${res.status}`
+    //     );
+    //   }
 
-      const data = await res.json();
-      const created = data.user || data;
-      setCustomers((prev) => [created, ...prev]);
-      toast.success("Customer created successfully!");
-    } catch (err) {
-      console.error("Create customer failed:", err);
-      toast.error(`Failed to create customer: ${err.message}`);
-    }
+    //   const data = await res.json();
+    //   const created = data.user || data;
+    //   setCustomers((prev) => [created, ...prev]);
+    //   toast.success("Customer created successfully!");
+    // } catch (err) {
+    //   console.error("Create customer failed:", err);
+    //   toast.error(`Failed to create customer: ${err.message}`);
+    // }
   }
 
   if (loading) {
@@ -348,9 +348,9 @@ export default function CustomersPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold">Customers</h1>
-        <Button onClick={handleAddClick}>
+        {/* <Button onClick={handleAddClick}>
           <Plus size={16} className="mr-1" /> Add Customer
-        </Button>
+        </Button> */}
       </div>
 
       <div className="bg-white rounded-lg border">
