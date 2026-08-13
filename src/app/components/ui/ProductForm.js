@@ -100,8 +100,8 @@ function validateForm(form) {
       if (!String(v.flavour ?? "").trim()) errors.push(`${label}: flavour is required`);
       if (!String(v.size ?? "").trim()) errors.push(`${label}: size is required`);
       if (v.price === "" || v.price == null) errors.push(`${label}: price is required`);
-      if (v.discountedPrice === "" || v.discountedPrice == null)
-        errors.push(`${label}: discounted price is required`);
+      // if (v.discountedPrice === "" || v.discountedPrice == null)
+      //   errors.push(`${label}: discounted price is required`);
       if (v.stockQuantity === "" || v.stockQuantity == null)
         errors.push(`${label}: stock quantity is required`);
     });

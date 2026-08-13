@@ -57,8 +57,15 @@ export default function CustomerTable({ customers, onView, onEdit, onDelete }) {
             <TableCell className="text-sm">{c.createdAt.slice(0,10)}</TableCell>
 
             <TableCell>
-              <Badge className="bg-green-100 text-green-700" variant="outline">
-                {c.status}
+              <Badge
+                variant="outline"
+                className={
+                  c.status
+                    ? "bg-green-100 text-green-700 border-green-200"
+                    : "bg-red-100 text-red-700 border-red-200"
+                }
+              >
+                {c.status ? "Activated" : "Deactivated"}
               </Badge>
             </TableCell>
 

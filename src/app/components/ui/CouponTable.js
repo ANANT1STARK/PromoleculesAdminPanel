@@ -22,17 +22,18 @@ export default function CouponTable({ coupons, onEdit, onDelete }) {
 
   return (
     <table className="w-full text-sm">
-      <thead className="border-b bg-muted/40">
-        <tr className="text-left">
-          <th className="p-3">Code</th>
-          <th className="p-3">Discount</th>
-          <th className="p-3">Min Cart</th>
-          <th className="p-3">Usage</th>
-          <th className="p-3">Status</th>
-          <th className="p-3">Expires</th>
-          <th className="p-3 text-right">Actions</th>
-        </tr>
-      </thead>
+    <thead className="border-b bg-muted/40">
+      <tr className="text-left">
+        <th className="p-3">Code</th>
+        <th className="p-3">Discount</th>
+        <th className="p-3">Min Cart</th>
+        <th className="p-3">Usage</th>
+        <th className="p-3">Status</th>
+        <th className="p-3">Show on Checkout</th>
+        <th className="p-3">Expires</th>
+        <th className="p-3 text-right">Actions</th>
+      </tr>
+    </thead>
       <tbody>
         {coupons.map((coupon) => (
           <tr key={coupon.id} className="border-b last:border-0">
@@ -46,6 +47,13 @@ export default function CouponTable({ coupons, onEdit, onDelete }) {
             <td className="p-3">
               <Badge variant={coupon.isActive ? "default" : "secondary"}>
                 {coupon.isActive ? "Active" : "Inactive"}
+              </Badge>
+            </td>
+            <td className="p-3">
+              <Badge
+                variant={coupon.showOnCheckout ? "default" : "secondary"}
+              >
+                {coupon.showOnCheckout ? "Yes" : "No"}
               </Badge>
             </td>
             <td className="p-3">{formatExpiry(coupon.expiresAt)}</td>

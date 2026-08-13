@@ -17,11 +17,29 @@ import { Pencil, Trash2 } from "lucide-react";
 function getVariantStats(product) {
   const variants = product.variants || [];
 
-  const prices = variants.map((v) => parseFloat(v.price)).filter((n) => !Number.isNaN(n));
-  const discounted = variants
-    .map((v) => parseFloat(v.discountedPrice))
+  const prices = variants
+    .map((v) => parseFloat(v.price))
     .filter((n) => !Number.isNaN(n));
-  const totalStock = variants.reduce((sum, v) => sum + (Number(v.stockQuantity) || 0), 0);
+
+  // If discountedPrice is null, use the regular price
+  const discounted = variants
+    .map((v) => {
+      const discountPrice = parseFloat(v.discountedPrice);
+
+      if (!Number.isNaN(discountPrice)) {
+        return discountPrice;
+      }
+
+      const regularPrice = parseFloat(v.price);
+
+      return !Number.isNaN(regularPrice) ? regularPrice : null;
+    })
+    .filter((n) => n !== null);
+
+  const totalStock = variants.reduce(
+    (sum, v) => sum + (Number(v.stockQuantity) || 0),
+    0
+  );
 
   return {
     minPrice: prices.length ? Math.min(...prices) : null,
@@ -71,20 +89,29 @@ export default function ProductTable({ products, onEdit, onDelete }) {
               </TableCell>
 
               <TableCell>
-                {stats.minDiscounted != null ? (
-                  <div className="text-sm">
-                    ₹{stats.minDiscounted}
-                    {stats.minDiscounted !== stats.maxDiscounted && (
-                      <span> – ₹{stats.maxDiscounted}</span>
+              {stats.minDiscounted != null ? (
+                <div className="text-sm">
+                  ₹{stats.minDiscounted}
+
+                  {stats.minDiscounted !== stats.maxDiscounted && (
+                    <span> – ₹{stats.maxDiscounted}</span>
+                  )}
+
+                  {stats.minPrice != null &&
+                    stats.minPrice > stats.minDiscounted && (
+                      <span className="text-slate-400 line-through ml-1.5">
+                        ₹{stats.minPrice}
+                      </span>
                     )}
-                    {stats.minPrice != null && stats.minPrice !== stats.minDiscounted && (
-                      <span className="text-slate-400 line-through ml-1.5">₹{stats.minPrice}</span>
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-slate-400 text-sm">—</span>
-                )}
-              </TableCell>
+                </div>
+              ) : stats.minPrice != null ? (
+                <span className="text-sm">
+                  ₹{stats.minPrice}
+                </span>
+              ) : (
+                <span className="text-slate-400 text-sm">—</span>
+              )}
+            </TableCell>
 
               <TableCell>
                 {stats.variantCount === 0 ? (

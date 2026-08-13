@@ -32,6 +32,10 @@ export default function CouponsPage() {
     async function fetchCoupons() {
       try {
         const res = await fetch(API_URL);
+
+        console.log(API_URL)
+
+        console.log(res)
         if (!res.ok) {
           throw new Error(`Request failed with status ${res.status}`);
         }
@@ -145,7 +149,7 @@ export default function CouponsPage() {
 
   if (loading) {
     return (
-      <div>
+      <div className="mr-4">
         <div className="flex items-center justify-between mb-4">
           <Skeleton className="h-8 w-44" />
           <Skeleton className="h-10 w-36 rounded-md" />
@@ -158,7 +162,7 @@ export default function CouponsPage() {
   if (error) return <p className="text-red-500">Failed to load coupons: {error}</p>;
 
   return (
-    <div>
+    <div className="mr-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold">Coupons</h1>
         <Button onClick={handleAddClick}>

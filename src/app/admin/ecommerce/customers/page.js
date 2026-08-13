@@ -151,6 +151,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard/users`;
 
+
 function getToken() {
   return sessionStorage.getItem("pm_admin_token");
 }
@@ -186,6 +187,8 @@ export default function CustomersPage() {
 
         const data = await res.json();
         setCustomers(data.users || []);
+        console.log("Fetched customers:", data.users || []);
+
       } catch (err) {
         console.error("Failed to fetch customers:", err);
         setError(err.message);
@@ -213,17 +216,19 @@ export default function CustomersPage() {
   }
 
   function handleDelete(customer) {
+    console.log("Preparing to delete customer:", customer);
     setCustomerToDelete(customer);
     setDeleteDialogOpen(true);
   }
 
   async function confirmDelete() {
     if (!customerToDelete) return;
-
+    console.log("Deleting customer:", customerToDelete);
     setDeleting(true);
 
     try {
-      const res = await fetch(`${API_URL}/${customerToDelete.id}`, {
+      
+      const res = await fetch(`${API_URL}/${customerToDelete}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -238,7 +243,7 @@ export default function CustomersPage() {
         );
       }
 
-      setCustomers((prev) => prev.filter((c) => c.id !== customerToDelete.id));
+      setCustomers((prev) => prev.filter((c) => c.id !== customerToDelete));
       toast.success("Customer deleted successfully!");
 
       setDeleteDialogOpen(false);
@@ -252,18 +257,27 @@ export default function CustomersPage() {
   }
 
   async function handleSave(customer) {
-    // editing existing user — PUT, id stripped from body
+    // editing existing user — PATCH  , id stripped from body
     if (customer.id) {
-      const { id, createdAt, ...bodyWithoutId } = customer;
+      const { id, status, createdAt, ...bodyWithoutId } = customer;
+
+      let updatedStatus = null;
+
+      if(status === "Activated" || status === true){
+        updatedStatus = true
+      }
+      else{
+        updatedStatus = false
+      }
 
       try {
-        const res = await fetch(`${API_URL}/${id}`, {
-          method: "PUT",
+        const res = await fetch(`${API_URL}/${id}/status`, {
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${getToken()}`,
           },
-          body: JSON.stringify(bodyWithoutId),
+          body: JSON.stringify({"status": updatedStatus}),
         });
 
         if (!res.ok) {
@@ -275,6 +289,7 @@ export default function CustomersPage() {
 
         const data = await res.json();
         const updated = data.user || data;
+        
         setCustomers((prev) =>
           prev.map((c) => (c.id === updated.id ? updated : c))
         );

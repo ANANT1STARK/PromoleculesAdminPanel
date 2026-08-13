@@ -29,7 +29,7 @@ export default function CustomerForm({ open, onOpenChange, customer, onSave }) {
         name: customer.name || "",
         phone: customer.phone || "",
         email: customer.email || "",
-        status: customer.status || "Activated",
+        status: customer.status ,
         isVendor: customer.isVendor || "No",
       });
     } else {
@@ -46,6 +46,7 @@ export default function CustomerForm({ open, onOpenChange, customer, onSave }) {
     e.preventDefault();
     onSave({ ...customer, ...form });
     onOpenChange(false);
+    console.log("Form submitted:", { ...customer, ...form });
   }
 
   return (
@@ -58,32 +59,37 @@ export default function CustomerForm({ open, onOpenChange, customer, onSave }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" name="name" value={form.name} onChange={handleChange} required />
+            <Input disabled id="name" name="name" value={form.name} onChange={handleChange} required />
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
+            <Input disabled id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" name="phone" value={form.phone} onChange={handleChange} />
+            <Input disabled id="phone" name="phone" value={form.phone} onChange={handleChange} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="w-full h-9 rounded-md border px-3 text-sm"
-              >
-                <option>Activated</option>
-                <option>Deactivated</option>
-              </select>
+            <select
+              id="status"
+              name="status"
+              value={form.status ? "Activated" : "Deactivated"}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  status: e.target.value === "Activated",
+                }))
+              }
+              className="w-full h-9 rounded-md border px-3 text-sm"
+            >
+              <option value="Activated">Activated</option>
+              <option value="Deactivated">Deactivated</option>
+            </select>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="isVendor">Is Vendor?</Label>

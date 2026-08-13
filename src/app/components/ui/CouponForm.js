@@ -28,6 +28,7 @@ const emptyForm = {
   maxDiscount: "",
   usageLimit: "",
   isActive: true,
+  showOnCheckout: true,
   expiresAt: "",
 };
 
@@ -147,8 +148,16 @@ export default function CouponForm({ open, onOpenChange, coupon, onSave }) {
           <div className="flex items-center justify-between">
             <Label>Active</Label>
             <Switch
-              checked={form.isActive ??""}
+              checked={form.isActive}
               onCheckedChange={(v) => handleChange("isActive", v)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label>Show on Checkout</Label>
+            <Switch
+              checked={form.showOnCheckout}
+              onCheckedChange={(v) => handleChange("showOnCheckout", v)}
             />
           </div>
         </div>
