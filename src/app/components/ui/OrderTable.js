@@ -10,9 +10,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-import { Pencil } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
 const paymentColors = {
   paid: "bg-green-100 text-green-700 border-green-200",
   pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
@@ -52,14 +49,14 @@ export default function OrderTable({
   onDelete,
 }) {
   return (
-    <Table className="min-w-[950px]">
+    <Table className="min-w-[1400px]">
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[18%]">
+          <TableHead className="w-[15%]">
             Order
           </TableHead>
 
-          <TableHead className="w-[20%]">
+          <TableHead className="w-[15%]">
             Customer
           </TableHead>
 
@@ -67,19 +64,24 @@ export default function OrderTable({
             Items
           </TableHead>
 
-          <TableHead className="w-[12%]">
+          {/* NEW */}
+          <TableHead className="w-[25%]">
+            Shipping Address
+          </TableHead>
+
+          <TableHead className="w-[10%]">
             Amount
           </TableHead>
 
-          <TableHead className="w-[13%]">
+          <TableHead className="w-[10%]">
             Payment
           </TableHead>
 
-          <TableHead className="w-[13%]">
+          <TableHead className="w-[10%]">
             Status
           </TableHead>
 
-          <TableHead className="w-[12%]">
+          <TableHead className="w-[10%]">
             Created
           </TableHead>
         </TableRow>
@@ -89,7 +91,7 @@ export default function OrderTable({
         {orders.length === 0 && (
           <TableRow>
             <TableCell
-              colSpan={7}
+              colSpan={8}
               className="py-10 text-center text-slate-400"
             >
               No orders found.
@@ -99,6 +101,7 @@ export default function OrderTable({
 
         {orders.map((o) => (
           <TableRow key={o.id}>
+
             {/* Order */}
             <TableCell>
               <div className="text-sm font-medium">
@@ -112,13 +115,13 @@ export default function OrderTable({
 
             {/* Customer */}
             <TableCell>
-              <div className="max-w-[220px] truncate text-sm font-medium">
+              <div className="max-w-[200px] truncate text-sm font-medium">
                 {o.user?.name ||
                   o.shippingFullName ||
                   "-"}
               </div>
 
-              <div className="max-w-[220px] break-all text-xs text-slate-400">
+              <div className="max-w-[200px] break-all text-xs text-slate-400">
                 {o.user?.email || "-"}
               </div>
 
@@ -144,6 +147,71 @@ export default function OrderTable({
                     ` + ${o.items.length - 1} more`}
                 </div>
               )}
+            </TableCell>
+
+            {/* Shipping Address */}
+            <TableCell>
+              <div className="max-w-[320px] text-sm">
+
+                {/* Name */}
+                <div className="font-medium text-slate-900">
+                  {o.shippingFullName || "-"}
+                </div>
+
+                {/* Mobile */}
+                <div className="text-xs text-slate-500">
+                  {o.shippingMobile || "-"}
+                </div>
+
+                {/* Address Line 1 */}
+                <div className="mt-1 text-xs text-slate-600">
+                  {o.shippingAddressLine1 || "-"}
+                </div>
+
+                {/* Address Line 2 */}
+                {o.shippingAddressLine2 && (
+                  <div className="text-xs text-slate-600">
+                    {o.shippingAddressLine2}
+                  </div>
+                )}
+
+                {/* Landmark */}
+                {o.shippingLandmark && (
+                  <div className="text-xs text-slate-500">
+                    Landmark: {o.shippingLandmark}
+                  </div>
+                )}
+
+                {/* City / State */}
+                <div className="text-xs text-slate-600">
+                  {[
+                    o.shippingCity,
+                    o.shippingState,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </div>
+
+                {/* Country / Pincode */}
+                <div className="text-xs text-slate-600">
+                  {[
+                    o.shippingCountry,
+                    o.shippingPincode,
+                  ]
+                    .filter(Boolean)
+                    .join(" - ")}
+                </div>
+
+                {/* Address Type */}
+                {o.shippingAddressType && (
+                  <Badge
+                    variant="outline"
+                    className="mt-1 text-[10px]"
+                  >
+                    {o.shippingAddressType}
+                  </Badge>
+                )}
+              </div>
             </TableCell>
 
             {/* Amount */}
@@ -193,6 +261,7 @@ export default function OrderTable({
             <TableCell className="whitespace-nowrap text-sm">
               {formatDate(o.createdAt)}
             </TableCell>
+
           </TableRow>
         ))}
       </TableBody>
