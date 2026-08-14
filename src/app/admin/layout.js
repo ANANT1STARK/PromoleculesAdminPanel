@@ -1,32 +1,27 @@
-// import Sidebar from "@/app/components/ui/Sidebar";
-// import Topbar from "@/app/components/ui/Topbar";
+"use client";
 
-// export default function AdminLayout({ children }) {
-//   return (
-//     <div className="flex">
-//       <Sidebar />
-//       <div className="flex-1 flex flex-col min-h-screen">
-//         <Topbar />
-//         <main className="flex-1 bg-[--background] text-[--foreground] p-6">{children}</main>      </div>
-//     </div>
-//   );
-// }
-// fixed sidebar problem for not sticking 
-
+import { useState } from "react";
 import Sidebar from "@/app/components/ui/Sidebar";
 import Topbar from "@/app/components/ui/Topbar";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function AdminLayout({ children }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <ProtectedRoute>
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar />
+      <div className="flex h-screen overflow-hidden bg-background">
+        <Sidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
 
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <Topbar />
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <Topbar
+            onMenuClick={() => setSidebarOpen(true)}
+          />
 
-          <main className="flex-1 overflow-y-auto bg-background p-6">
+          <main className="flex-1 overflow-y-auto bg-background p-4 sm:p-5 lg:p-6">
             {children}
           </main>
         </div>

@@ -24,7 +24,7 @@ export default function TopProducts({ products }) {
 
       <CardContent className="p-0">
         <ScrollArea className="w-full">
-          <Table>
+          <Table className="min-w-[620px]">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="pl-6">Item</TableHead>

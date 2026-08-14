@@ -16,7 +16,7 @@ const legendItems = [
 
 function RevenueChart({ data, period = "Yearly" }) {
   return (
-    <Card className="border-border/60 lg:col-span-2">
+    <Card className="border-border/60 xl:col-span-2">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base font-semibold">Revenue Report</CardTitle>
         <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
@@ -27,8 +27,13 @@ function RevenueChart({ data, period = "Yearly" }) {
       <CardContent>
         <ChartLegend items={legendItems} className="mb-4" />
 
-        <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={data} barGap={6} margin={{ left: -12 }}>
+        <div className="h-[220px] w-full sm:h-[260px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            barGap={6}
+            margin={{ top: 4, right: 4, bottom: 0, left: -12 }}
+          >
             <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis
               dataKey="month"
@@ -67,8 +72,9 @@ function RevenueChart({ data, period = "Yearly" }) {
               animationDuration={700}
               animationBegin={100}
             />
-          </BarChart>
-        </ResponsiveContainer>
+     </BarChart>
+  </ResponsiveContainer>
+</div>
       </CardContent>
     </Card>
   );

@@ -13,11 +13,12 @@ const ICONS = {
   rupee: IndianRupee,
 };
 
-function StatCard({ label, formattedValue, deltaLabel, trend, icon, sparkline, isLoading }) {
+export default function StatCard({ label, formattedValue, deltaLabel, trend, icon, sparkline, isLoading }) {
   const Icon = ICONS[icon] ?? Package;
   const isUp = trend === "up";
   const sparkData = sparkline.map((value, index) => ({ index, value }));
   const sparkColor = isUp ? "hsl(142 71% 45%)" : "hsl(0 84% 60%)";
+
 
   if (isLoading) {
     return (
@@ -35,59 +36,89 @@ function StatCard({ label, formattedValue, deltaLabel, trend, icon, sparkline, i
       </Card>
     );
   }
-
-  return (
-    <Card className="group border-border/60 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-black/10">
-      <CardContent className="pt-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary transition-colors duration-200 group-hover:bg-primary/25">
-              <Icon className="h-5 w-5" strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold leading-tight tracking-tight text-foreground">
-                {formattedValue}
-              </p>
-              <p className="text-sm text-muted-foreground">{label}</p>
-            </div>
+return (
+  <Card className="group border-border/60 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-black/10">
+    <CardContent className="pt-4 sm:pt-6">
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
+        <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary transition-colors duration-200 group-hover:bg-primary/25 sm:h-10 sm:w-10">
+            <Icon className="h-4.5 w-4.5 sm:h-5 sm:w-5" strokeWidth={2} />
           </div>
 
-          <span
-            className={`flex shrink-0 items-center gap-0.5 rounded-full px-2 py-1 text-xs font-medium ${
-              isUp
-                ? "bg-emerald-500/15 text-emerald-500 dark:text-emerald-400"
-                : "bg-red-500/15 text-red-500 dark:text-red-400"
-            }`}
+          <div className="min-w-0">
+            <p className="truncate text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
+              {formattedValue}
+            </p>
+
+            <p className="truncate text-xs text-muted-foreground sm:text-sm">
+              {label}
+            </p>
+          </div>
+        </div>
+
+        <span
+          className={`flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-1 text-[10px] font-medium sm:px-2 sm:text-xs ${
+            isUp
+              ? "bg-emerald-500/15 text-emerald-500 dark:text-emerald-400"
+              : "bg-red-500/15 text-red-500 dark:text-red-400"
+          }`}
+        >
+          {isUp ? (
+            <TrendingUp className="h-3 w-3" />
+          ) : (
+            <TrendingDown className="h-3 w-3" />
+          )}
+
+          {deltaLabel}
+        </span>
+      </div>
+
+      <div className="mt-3 h-9 sm:h-10">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart
+            data={sparkData}
+            margin={{
+              top: 2,
+              right: 0,
+              bottom: 0,
+              left: 0,
+            }}
           >
-            {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-            {deltaLabel}
-          </span>
-        </div>
+            <defs>
+              <linearGradient
+                id={`spark-${label}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="0%"
+                  stopColor={sparkColor}
+                  stopOpacity={0.35}
+                />
 
-        <div className="mt-3 h-10">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={sparkData} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-              <defs>
-                <linearGradient id={`spark-${label}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={sparkColor} stopOpacity={0.35} />
-                  <stop offset="100%" stopColor={sparkColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke={sparkColor}
-                strokeWidth={1.75}
-                fill={`url(#spark-${label})`}
-                isAnimationActive
-                animationDuration={800}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  );
+                <stop
+                  offset="100%"
+                  stopColor={sparkColor}
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
+
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke={sparkColor}
+              strokeWidth={1.75}
+              fill={`url(#spark-${label})`}
+              isAnimationActive
+              animationDuration={800}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </CardContent>
+  </Card>
+);
 }
-
-export default memo(StatCard);

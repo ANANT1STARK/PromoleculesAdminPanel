@@ -32,7 +32,7 @@ export default function StockReport({ items }) {
 
       <CardContent className="p-0">
         <ScrollArea className="w-full">
-          <Table>
+          <Table className="min-w-[560px]">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="pl-6">Item</TableHead>

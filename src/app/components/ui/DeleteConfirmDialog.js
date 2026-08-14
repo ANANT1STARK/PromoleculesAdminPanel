@@ -1,6 +1,10 @@
 "use client";
 
-import { Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  Trash2,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 
 import {
   AlertDialog,
@@ -22,40 +26,118 @@ export default function DeleteConfirmDialog({
   loading = false,
 }) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="sm:max-w-md">
+    <AlertDialog
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <AlertDialogContent
+        className="
+          w-[calc(100%-2rem)]
+          max-w-md
+          rounded-xl
+          p-5
+          sm:p-6
+        "
+      >
         <AlertDialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+          {/* Icon + Title */}
+          <div className="flex items-start gap-3">
+            <div
+              className="
+                flex
+                h-10
+                w-10
+                shrink-0
+                items-center
+                justify-center
+                rounded-full
+                bg-red-100
+              "
+            >
+              <AlertTriangle
+                className="h-5 w-5 text-red-600"
+              />
             </div>
 
-            <AlertDialogTitle>{title}</AlertDialogTitle>
+            <AlertDialogTitle
+              className="
+                min-w-0
+                break-words
+                pt-1
+                text-base
+                sm:text-lg
+              "
+            >
+              {title}
+            </AlertDialogTitle>
           </div>
 
-          <AlertDialogDescription className="pt-2">
+          {/* Description */}
+          <AlertDialogDescription
+            className="
+              break-words
+              pt-2
+              text-sm
+              leading-6
+            "
+          >
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>
+        {/* Actions */}
+        <AlertDialogFooter
+          className="
+            mt-2
+            flex-col-reverse
+            gap-2
+            sm:flex-row
+            sm:justify-end
+          "
+        >
+          <AlertDialogCancel
+            disabled={loading}
+            className="
+              m-0
+              w-full
+              sm:w-auto
+            "
+          >
             Cancel
           </AlertDialogCancel>
 
           <AlertDialogAction
             onClick={onConfirm}
             disabled={loading}
-            className="bg-red-600 hover:bg-red-700"
+            className="
+              m-0
+              w-full
+              bg-red-600
+              hover:bg-red-700
+              sm:w-auto
+            "
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2
+                  className="
+                    mr-2
+                    h-4
+                    w-4
+                    animate-spin
+                  "
+                />
                 Deleting...
               </>
             ) : (
               <>
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2
+                  className="
+                    mr-2
+                    h-4
+                    w-4
+                  "
+                />
                 Delete
               </>
             )}

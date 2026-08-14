@@ -1,147 +1,8 @@
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import { Button } from "@/components/ui/button";
-// import { toast } from "sonner";
-// import { Plus } from "lucide-react";
-// import CustomerTable from "@/app/components/ui/CustomerTable";
-// import CustomerForm from "@/app/components/ui/CustomerForm";
-// import CustomerViewDialog from "@/app/components/ui/CustomerViewDialog";
-// import TableSkeleton from "@/app/components/ui/TableSkeleton";
-// import { Skeleton } from "@/components/ui/skeleton";
-
-// export default function CustomersPage() {
-//   const [customers, setCustomers] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [formOpen, setFormOpen] = useState(false);
-//   const [viewOpen, setViewOpen] = useState(false);
-//   const [selectedCustomer, setSelectedCustomer] = useState(null);
-
-//   useEffect(() => {
-//     async function fetchCustomers() {
-//       const token = sessionStorage.getItem("pm_admin_token");
-//       try {
-//         const res = await fetch(
-//           `${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard/users`,
-//           {
-//             method: "GET",
-//             headers: {
-//               "Content-Type": "application/json",
-//               Authorization: `Bearer ${token}`,
-//             },
-//           }
-//         );
-
-//         if (!res.ok) {
-//           throw new Error(`Request failed with status ${res.status}`);
-//         }
-
-//         const data = await res.json();
-//         console.log(data);
-
-//         setCustomers(data.users || []);
-//       } catch (err) {
-//         console.error("Failed to fetch customers:", err);
-//         setError(err.message);
-//       } finally {
-//         setLoading(false);
-//       }
-//     }
-
-//     fetchCustomers();
-
-//   }, []);
-
-//   function handleAddClick() {
-//     setSelectedCustomer(null);
-//     setFormOpen(true);
-//   }
-
-//   function handleEditClick(customer) {
-//     setSelectedCustomer(customer);
-//     setFormOpen(true);
-//   }
-
-//   function handleViewClick(customer) {
-//     setSelectedCustomer(customer);
-//     setViewOpen(true);
-//   }
-
-//   function handleDelete(id) {
-//     setCustomers((prev) => prev.filter((c) => c.id !== id));
-//   }
-
-//   function handleSave(customer) {
-//     if (customer.id) {
-//       setCustomers((prev) =>
-//         prev.map((c) => (c.id === customer.id ? customer : c))
-//       );
-//     } else {
-//       const newCustomer = {
-//         ...customer,
-//         id: Date.now(),
-//         createdAt: new Date().toISOString().slice(0, 10),
-//       };
-//       setCustomers((prev) => [newCustomer, ...prev]);
-//     }
-//   }
-
-//   if (loading) {
-//     return (
-//       <div>
-//         <div className="flex items-center justify-between mb-4">
-//           <Skeleton className="h-8 w-44" />
-//           <Skeleton className="h-10 w-36 rounded-md" />
-//         </div>
-
-//         <TableSkeleton rows={6} columns={5} />
-//       </div>
-//     );
-//   }
-
-//   if (error) return <p className="text-red-500">Failed to load customers: {error}</p>;
-
-//   return (
-//     <div>
-//       <div className="flex items-center justify-between mb-4">
-//         <h1 className="text-xl font-semibold">Customers</h1>
-//         <Button onClick={handleAddClick}>
-//           <Plus size={16} className="mr-1" /> Add Customer
-//         </Button>
-//       </div>
-
-//       <div className="bg-white rounded-lg border">
-//         <CustomerTable
-//           customers={customers}
-//           onView={handleViewClick}
-//           onEdit={handleEditClick}
-//           onDelete={handleDelete}
-//         />
-//       </div>
-
-//       <CustomerForm
-//         open={formOpen}
-//         onOpenChange={setFormOpen}
-//         customer={selectedCustomer}
-//         onSave={handleSave}
-//       />
-
-//       <CustomerViewDialog
-//         open={viewOpen}
-//         onOpenChange={setViewOpen}
-//         customer={selectedCustomer}
-//       />
-//     </div>
-//   );
-// }
-
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+
 import CustomerTable from "@/app/components/ui/CustomerTable";
 import CustomerForm from "@/app/components/ui/CustomerForm";
 import CustomerViewDialog from "@/app/components/ui/CustomerViewDialog";
@@ -151,13 +12,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard/users`;
 
-
 function getToken() {
   return sessionStorage.getItem("pm_admin_token");
 }
 
 export default function CustomersPage() {
-  
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -186,9 +45,8 @@ export default function CustomersPage() {
         }
 
         const data = await res.json();
-        setCustomers(data.users || []);
-        console.log("Fetched customers:", data.users || []);
 
+        setCustomers(data.users || []);
       } catch (err) {
         console.error("Failed to fetch customers:", err);
         setError(err.message);
@@ -199,11 +57,6 @@ export default function CustomersPage() {
 
     fetchCustomers();
   }, []);
-
-  function handleAddClick() {
-    setSelectedCustomer(null);
-    setFormOpen(true);
-  }
 
   function handleEditClick(customer) {
     setSelectedCustomer(customer);
@@ -216,152 +69,157 @@ export default function CustomersPage() {
   }
 
   function handleDelete(customer) {
-    console.log("Preparing to delete customer:", customer);
     setCustomerToDelete(customer);
     setDeleteDialogOpen(true);
   }
 
   async function confirmDelete() {
-    if (!customerToDelete) return;
-    console.log("Deleting customer:", customerToDelete);
+    if (!customerToDelete?.id) return;
+
     setDeleting(true);
 
     try {
-      
-      const res = await fetch(`${API_URL}/${customerToDelete}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
+      const res = await fetch(
+        `${API_URL}/${customerToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
 
       if (!res.ok) {
         const errData = await res.json().catch(() => null);
+
         throw new Error(
-          errData?.message || `Deletion failed with status ${res.status}`
+          errData?.message ||
+            `Deletion failed with status ${res.status}`
         );
       }
 
-      setCustomers((prev) => prev.filter((c) => c.id !== customerToDelete));
+      setCustomers((prev) =>
+        prev.filter((c) => c.id !== customerToDelete.id)
+      );
+
       toast.success("Customer deleted successfully!");
 
       setDeleteDialogOpen(false);
       setCustomerToDelete(null);
     } catch (err) {
-      console.error(err);
-      toast.error(`Failed to delete customer: ${err.message}`);
+      console.error("Delete customer failed:", err);
+
+      toast.error(
+        `Failed to delete customer: ${err.message}`
+      );
     } finally {
       setDeleting(false);
     }
   }
 
   async function handleSave(customer) {
-    // editing existing user — PATCH  , id stripped from body
-    if (customer.id) {
-      const { id, status, createdAt, ...bodyWithoutId } = customer;
+    if (!customer.id) return;
 
-      let updatedStatus = null;
+    const { id, status } = customer;
 
-      if(status === "Activated" || status === true){
-        updatedStatus = true
-      }
-      else{
-        updatedStatus = false
-      }
+    const updatedStatus =
+      status === "Activated" || status === true;
 
-      try {
-        const res = await fetch(`${API_URL}/${id}/status`, {
+    try {
+      const res = await fetch(
+        `${API_URL}/${id}/status`,
+        {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${getToken()}`,
           },
-          body: JSON.stringify({"status": updatedStatus}),
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => null);
-          throw new Error(
-            errData?.message || `Request failed with status ${res.status}`
-          );
+          body: JSON.stringify({
+            status: updatedStatus,
+          }),
         }
+      );
 
-        const data = await res.json();
-        const updated = data.user || data;
-        
-        setCustomers((prev) =>
-          prev.map((c) => (c.id === updated.id ? updated : c))
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+
+        throw new Error(
+          errData?.message ||
+            `Request failed with status ${res.status}`
         );
-        toast.success("Customer updated successfully!");
-      } catch (err) {
-        console.error("Update customer failed:", err);
-        toast.error(`Failed to update customer: ${err.message}`);
       }
-      return;
+
+      const data = await res.json();
+      const updated = data.user || data;
+
+      setCustomers((prev) =>
+        prev.map((c) =>
+          c.id === updated.id ? updated : c
+        )
+      );
+
+      toast.success("Customer updated successfully!");
+    } catch (err) {
+      console.error("Update customer failed:", err);
+
+      toast.error(
+        `Failed to update customer: ${err.message}`
+      );
     }
-
-    // creating a new user — POST
-    // try {
-    //   const res = await fetch(API_URL, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${getToken()}`,
-    //     },
-    //     body: JSON.stringify(customer),
-    //   });
-
-    //   if (!res.ok) {
-    //     const errData = await res.json().catch(() => null);
-    //     throw new Error(
-    //       errData?.message || `Request failed with status ${res.status}`
-    //     );
-    //   }
-
-    //   const data = await res.json();
-    //   const created = data.user || data;
-    //   setCustomers((prev) => [created, ...prev]);
-    //   toast.success("Customer created successfully!");
-    // } catch (err) {
-    //   console.error("Create customer failed:", err);
-    //   toast.error(`Failed to create customer: ${err.message}`);
-    // }
   }
 
   if (loading) {
     return (
-      <div>
-        <div className="flex items-center justify-between mb-4">
+      <div className="w-full space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Skeleton className="h-8 w-44" />
-          <Skeleton className="h-10 w-36 rounded-md" />
+          <Skeleton className="h-10 w-full rounded-md sm:w-36" />
         </div>
 
-        <TableSkeleton rows={6} columns={5} />
+        <div className="w-full overflow-hidden rounded-lg border bg-white">
+          <TableSkeleton rows={6} columns={7} />
+        </div>
       </div>
     );
   }
 
-  if (error) return <p className="text-red-500">Failed to load customers: {error}</p>;
+  if (error) {
+    return (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+        Failed to load customers: {error}
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">Customers</h1>
-        {/* <Button onClick={handleAddClick}>
-          <Plus size={16} className="mr-1" /> Add Customer
-        </Button> */}
+    <div className="w-full space-y-4 sm:space-y-5">
+      {/* Page Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold sm:text-2xl">
+            Customers
+          </h1>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage your customers and their account status.
+          </p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg border">
-        <CustomerTable
-          customers={customers}
-          onView={handleViewClick}
-          onEdit={handleEditClick}
-          onDelete={handleDelete}
-        />
+      {/* Customer Table */}
+      <div className="w-full overflow-hidden rounded-lg border bg-white">
+        <div className="w-full overflow-x-auto">
+          <CustomerTable
+            customers={customers}
+            onView={handleViewClick}
+            onEdit={handleEditClick}
+            onDelete={handleDelete}
+          />
+        </div>
       </div>
 
+      {/* Edit Customer */}
       <CustomerForm
         open={formOpen}
         onOpenChange={setFormOpen}
@@ -369,12 +227,14 @@ export default function CustomersPage() {
         onSave={handleSave}
       />
 
+      {/* View Customer */}
       <CustomerViewDialog
         open={viewOpen}
         onOpenChange={setViewOpen}
         customer={selectedCustomer}
       />
 
+      {/* Delete Confirmation */}
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}

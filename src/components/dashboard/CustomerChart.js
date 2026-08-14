@@ -11,14 +11,19 @@ function CustomerChart({ data, period = "Monthly" }) {
   return (
     <Card className="border-border/60">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-base font-semibold">Customer Statistics</CardTitle>
+
+        
+        <CardTitle className="text-sm font-semibold sm:text-base">
+          Customer Statistics
+        </CardTitle>
+
         <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
           {period}
         </span>
       </CardHeader>
 
       <CardContent className="flex flex-col items-center">
-        <div className="relative h-[200px] w-full">
+        <div className="relative h-[180px] w-full sm:h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

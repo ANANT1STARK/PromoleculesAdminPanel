@@ -12,7 +12,6 @@ export default function OrdersPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
 
-  // Filters
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -28,14 +27,16 @@ export default function OrdersPage() {
           {
             method: "GET",
             headers: {
-              "Content-Type": "Application/json",
+              "Content-Type": "application/json",
               Authorization: `Bearer ${Token()}`,
             },
           }
         );
 
         if (!res.ok) {
-          throw new Error("Failed to fetch orders : " + res.status);
+          throw new Error(
+            `Failed to fetch orders: ${res.status}`
+          );
         }
 
         const data = await res.json();
@@ -57,18 +58,21 @@ export default function OrdersPage() {
   }
 
   function handleDelete(id) {
-    setOrders((prev) => prev.filter((o) => o.id !== id));
+    setOrders((prev) =>
+      prev.filter((order) => order.id !== id)
+    );
   }
 
   function handleSave(updatedOrder) {
     setOrders((prev) =>
-      prev.map((o) =>
-        o.id === updatedOrder.id ? updatedOrder : o
+      prev.map((order) =>
+        order.id === updatedOrder.id
+          ? updatedOrder
+          : order
       )
     );
   }
 
-  // Apply filters
   const filteredOrders = orders.filter((order) => {
     const paymentMatches =
       paymentFilter === "all" ||
@@ -82,20 +86,27 @@ export default function OrdersPage() {
   });
 
   return (
-    <div>
-      <h1 className="text-xl font-semibold mb-4">
-        Orders
-      </h1>
+    <div className="w-full space-y-4 sm:space-y-5">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl font-semibold sm:text-2xl">
+          Orders
+        </h1>
+
+        <p className="mt-1 text-sm text-muted-foreground">
+          Manage orders, payments and order status.
+        </p>
+      </div>
 
       {/* Filters */}
-      <div className="bg-white border rounded-lg p-4 mb-4">
-        <div className="flex flex-wrap items-center gap-4">
-
-          {/* Payment Filter */}
-          <div className="flex items-center gap-2">
+      <div className="rounded-lg border bg-white p-3 sm:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          
+          {/* Payment */}
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <label
               htmlFor="payment-filter"
-              className="text-sm font-medium text-slate-700"
+              className="shrink-0 text-sm font-medium text-slate-700"
             >
               Payment:
             </label>
@@ -103,8 +114,10 @@ export default function OrdersPage() {
             <select
               id="payment-filter"
               value={paymentFilter}
-              onChange={(e) => setPaymentFilter(e.target.value)}
-              className="h-9 rounded-md border border-slate-300 bg-white px-3 text-sm outline-none focus:border-slate-500"
+              onChange={(e) =>
+                setPaymentFilter(e.target.value)
+              }
+              className="h-9 min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 text-sm outline-none focus:border-slate-500 sm:w-[130px] sm:flex-none"
             >
               <option value="all">All</option>
               <option value="paid">Paid</option>
@@ -113,11 +126,11 @@ export default function OrdersPage() {
             </select>
           </div>
 
-          {/* Status Filter */}
-          <div className="flex items-center gap-2">
+          {/* Status */}
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <label
               htmlFor="status-filter"
-              className="text-sm font-medium text-slate-700"
+              className="shrink-0 text-sm font-medium text-slate-700"
             >
               Status:
             </label>
@@ -125,8 +138,10 @@ export default function OrdersPage() {
             <select
               id="status-filter"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-9 rounded-md border border-slate-300 bg-white px-3 text-sm outline-none focus:border-slate-500"
+              onChange={(e) =>
+                setStatusFilter(e.target.value)
+              }
+              className="h-9 min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 text-sm outline-none focus:border-slate-500 sm:w-[150px] sm:flex-none"
             >
               <option value="all">All</option>
               <option value="pending">Pending</option>
@@ -138,40 +153,48 @@ export default function OrdersPage() {
             </select>
           </div>
 
-          {/* Clear Filters */}
-          {(paymentFilter !== "all" || statusFilter !== "all") && (
+          {/* Clear */}
+          {(paymentFilter !== "all" ||
+            statusFilter !== "all") && (
             <button
               type="button"
               onClick={() => {
                 setPaymentFilter("all");
                 setStatusFilter("all");
               }}
-              className="text-sm text-slate-500 hover:text-slate-900"
+              className="self-start text-sm text-slate-500 hover:text-slate-900 sm:self-auto"
             >
               Clear filters
             </button>
           )}
 
-          {/* Result count */}
-          <div className="ml-auto text-sm text-slate-400">
-            Showing {filteredOrders.length} of {orders.length} orders
+          {/* Count */}
+          <div className="text-xs text-slate-400 sm:ml-auto sm:text-sm">
+            Showing {filteredOrders.length} of{" "}
+            {orders.length} orders
           </div>
         </div>
       </div>
 
-      {/* Orders Table */}
+      {/* Orders */}
       {loading ? (
-        <TableSkeleton rows={8} columns={7} />
+        <TableSkeleton
+          rows={8}
+          columns={7}
+        />
       ) : (
-        <div className="bg-white rounded-lg border">
-          <OrderTable
-            orders={filteredOrders}
-            onEdit={handleEditClick}
-            onDelete={handleDelete}
-          />
+        <div className="w-full overflow-hidden rounded-lg border bg-white">
+          <div className="w-full overflow-x-auto">
+            <OrderTable
+              orders={filteredOrders}
+              onEdit={handleEditClick}
+              onDelete={handleDelete}
+            />
+          </div>
         </div>
       )}
 
+      {/* Edit Dialog */}
       <OrderEditForm
         open={formOpen}
         onOpenChange={setFormOpen}
